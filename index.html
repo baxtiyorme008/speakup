@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpeakUP! — IELTS Speaking Assessment</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080d1a;--bg2:#0f1626;--bg3:#161f33;--bg4:#1c2840;
+  --accent:#13f0bd;--accent2:#0dc49d;--warn:#f59e0b;--danger:#ef4444;
+  --text:#eef2ff;--text2:#8899bb;--text3:#3d4f6e;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --r:14px;--fh:'Syne',sans-serif;--fb:'DM Sans',sans-serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--fb);font-size:16px;line-height:1.6;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(ellipse 80% 50% at 50% -20%,rgba(19,240,189,0.06),transparent);pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(19,240,189,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(19,240,189,0.025) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+.screen{display:none;min-height:100vh;position:relative;z-index:1;flex-direction:column}
+.screen.active{display:flex;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px}
+.wrap{width:100%;max-width:620px;margin:0 auto}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;border-bottom:1px solid var(--border);background:rgba(8,13,26,0.8);backdrop-filter:blur(12px);position:sticky;top:0;z-index:10}
+.logo{font-family:var(--fh);font-size:22px;font-weight:800;letter-spacing:-.03em;color:var(--accent)}
+.logo em{color:var(--text);font-style:normal}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:28px;width:100%;max-width:580px}
+h1{font-family:var(--fh);font-size:clamp(34px,6vw,56px);font-weight:800;line-height:1.05;letter-spacing:-.03em}
+h2{font-family:var(--fh);font-size:clamp(22px,4vw,32px);font-weight:700;line-height:1.2}
+h3{font-family:var(--fh);font-size:18px;font-weight:600}
+.acc{color:var(--accent)}
+.muted{color:var(--text2);font-size:14px}
+.pill{display:inline-flex;align-items:center;gap:6px;background:rgba(19,240,189,0.08);border:1px solid rgba(19,240,189,0.2);color:var(--accent);padding:5px 14px;border-radius:100px;font-size:12px;font-weight:500;font-family:var(--fh);letter-spacing:.03em}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 26px;border-radius:12px;font-family:var(--fb);font-size:15px;font-weight:500;cursor:pointer;border:none;transition:all .2s ease;text-decoration:none;white-space:nowrap}
+.btn-p{background:var(--accent);color:#061410;font-weight:600}
+.btn-p:hover{background:#20ffce;transform:translateY(-1px)}
+.btn-p:active{transform:translateY(0)}
+.btn-g{background:transparent;color:var(--text2);border:1px solid var(--border2)}
+.btn-g:hover{border-color:var(--accent);color:var(--accent)}
+.btn-lg{padding:17px 40px;font-size:17px;border-radius:14px}
+.btn-full{width:100%}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none!important}
+.field{margin-bottom:18px}
+.field label{display:block;font-size:11px;font-weight:500;color:var(--text3);margin-bottom:8px;letter-spacing:.07em;text-transform:uppercase}
+.field input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:13px 15px;color:var(--text);font-family:var(--fb);font-size:15px;transition:border-color .2s;outline:none}
+.field input:focus{border-color:var(--accent);background:var(--bg4)}
+.field input::placeholder{color:var(--text3)}
+.err{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:10px;padding:11px 14px;font-size:13px;color:#f87171;margin-bottom:16px;display:none}
+.err.show{display:block}
+.prog-track{background:var(--bg3);border-radius:100px;height:3px;overflow:hidden}
+.prog-fill{height:100%;background:var(--accent);border-radius:100px;transition:width .5s ease}
+.status{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:100px;font-size:12px;font-weight:500}
+.status.playing{background:rgba(19,240,189,0.08);color:var(--accent)}
+.status.recording{background:rgba(239,68,68,0.12);color:#f87171}
+.status.waiting{background:rgba(136,153,187,0.08);color:var(--text2)}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dot-r{background:var(--danger);animation:pd 1.2s ease-in-out infinite}
+.dot-g{background:var(--accent)}
+.dot-m{background:var(--text3)}
+@keyframes pd{0%,100%{opacity:1}50%{opacity:.3}}
+.waveform{display:flex;align-items:center;justify-content:center;gap:4px;height:52px}
+.wb{width:4px;border-radius:2px;background:var(--accent);opacity:.25;transform:scaleY(.3);animation:wv 1.2s ease-in-out infinite}
+.wb:nth-child(1){animation-delay:0s}.wb:nth-child(2){animation-delay:.08s}.wb:nth-child(3){animation-delay:.16s}.wb:nth-child(4){animation-delay:.24s}.wb:nth-child(5){animation-delay:.32s}.wb:nth-child(6){animation-delay:.4s}.wb:nth-child(7){animation-delay:.48s}.wb:nth-child(8){animation-delay:.56s}.wb:nth-child(9){animation-delay:.64s}.wb:nth-child(10){animation-delay:.72s}.wb:nth-child(11){animation-delay:.12s}.wb:nth-child(12){animation-delay:.2s}
+@keyframes wv{0%,100%{opacity:.2;transform:scaleY(.2)}50%{opacity:1;transform:scaleY(1)}}
+.waveform.live .wb{opacity:1}
+.mic{width:80px;height:80px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:30px;transition:all .25s ease;outline:none}
+.mic.idle{background:var(--accent)}
+.mic.idle:hover{transform:scale(1.06);background:#20ffce}
+.mic.idle:active{transform:scale(.97)}
+.mic.rec{background:var(--danger);animation:pr 1.8s ease-in-out infinite}
+@keyframes pr{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}50%{box-shadow:0 0 0 20px rgba(239,68,68,0)}}
+.mic:disabled{opacity:.3;cursor:not-allowed;transform:none!important;animation:none}
+.timer{font-family:var(--fh);font-size:52px;font-weight:800;line-height:1;letter-spacing:-.04em;color:var(--text)}
+.timer.warn{color:var(--warn)}
+.timer.danger{color:var(--danger);animation:blink .6s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+.part-n{font-family:var(--fh);font-size:clamp(80px,18vw,140px);font-weight:800;line-height:.9;letter-spacing:-.04em;color:transparent;-webkit-text-stroke:2px rgba(19,240,189,.25);text-shadow:0 0 80px rgba(19,240,189,.08)}
+.cue{background:var(--bg3);border:1px solid rgba(19,240,189,.18);border-radius:12px;padding:24px;margin-bottom:20px}
+.cue-label{font-size:11px;font-weight:500;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+.cue p{font-size:17px;font-weight:500;line-height:1.45;margin-bottom:14px}
+.cue ul{list-style:none;padding:0}
+.cue li{padding:7px 0 7px 20px;position:relative;color:var(--text2);font-size:14px;border-bottom:1px solid var(--border)}
+.cue li:last-child{border:none}
+.cue li::before{content:'→';position:absolute;left:0;color:var(--accent)}
+.pstep{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--border);font-size:14px;color:var(--text3)}
+.pstep.done{color:var(--accent)}
+.pstep.active{color:var(--text)}
+.pstep-icon{width:20px;text-align:center;flex-shrink:0;font-size:14px}
+.spin{width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.band-big{font-family:var(--fh);font-size:80px;font-weight:800;color:var(--accent);line-height:1;letter-spacing:-.05em}
+.crit-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:24px 0}
+.crit{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px}
+.crit-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:4px}
+.crit-sc{font-family:var(--fh);font-size:30px;font-weight:700;color:var(--text)}
+.crit-bar{background:var(--bg);height:3px;border-radius:3px;margin-top:10px;overflow:hidden}
+.crit-bar-f{height:100%;border-radius:3px;background:var(--accent);transition:width 1.2s cubic-bezier(.2,.8,.3,1)}
+.crit-fb{font-size:12px;color:var(--text2);margin-top:8px;line-height:1.5}
+.ans-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:10px;cursor:pointer;transition:border-color .2s,background .2s}
+.ans-card:hover{border-color:rgba(19,240,189,.3);background:var(--bg3)}
+.ans-card.active-play{border-color:var(--accent);background:var(--bg3)}
+.ans-meta{font-size:12px;color:var(--text3);margin-bottom:6px}
+.ans-q{font-size:14px;font-weight:500;color:var(--text2);margin-bottom:8px}
+.ans-t{font-size:14px;color:var(--text2);font-style:italic;line-height:1.55}
+.ans-band{font-family:var(--fh);font-size:22px;font-weight:700;color:var(--accent)}
+.fb-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.fb-box{border-radius:8px;padding:10px}
+.fb-box-g{background:rgba(19,240,189,.05)}
+.fb-box-w{background:rgba(245,158,11,.05)}
+.fb-box-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;font-weight:500}
+.fb-box-lbl.g{color:var(--accent)}
+.fb-box-lbl.w{color:var(--warn)}
+.fb-box p{font-size:12px;color:var(--text2);line-height:1.5}
+.player{display:flex;align-items:center;gap:14px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:16px}
+.play-b{width:42px;height:42px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:#061410;flex-shrink:0;transition:background .2s;font-weight:700}
+.play-b:hover{background:#20ffce}
+.tl{flex:1;display:flex;flex-direction:column;gap:5px}
+.tl-track{height:4px;background:var(--bg);border-radius:4px;overflow:hidden;cursor:pointer}
+.tl-fill{height:100%;background:var(--accent);width:0%;border-radius:4px;transition:width .1s linear}
+.tl-times{display:flex;justify-content:space-between;font-size:11px;color:var(--text3)}
+.tip{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--border);font-size:14px;color:var(--text2)}
+.tip-n{font-family:var(--fh);font-size:12px;font-weight:700;color:var(--accent);min-width:22px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:28px}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center}
+.stat-n{font-family:var(--fh);font-size:26px;font-weight:700;color:var(--accent)}
+.stat-l{font-size:12px;color:var(--text2);margin-top:2px}
+.notice{background:var(--bg3);border-radius:10px;padding:14px 16px;font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:20px}
+.notice strong{color:var(--accent)}
+.sec-title{font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px}
+/* Access code screen */
+.code-logo{font-family:var(--fh);font-size:44px;font-weight:800;letter-spacing:-.04em;color:var(--accent);margin-bottom:6px}
+.code-logo em{color:var(--text);font-style:normal}
+@media(max-width:480px){.crit-grid,.fb-row{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr 1fr}.nav{padding:14px 18px}.card{padding:20px 16px}h1{font-size:36px}}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════
+  SCREEN 0 — ACCESS CODE
+════════════════════════════════════ -->
+<div class="screen active" id="s-access">
+  <div class="center">
+    <div style="text-align:center;max-width:420px;width:100%">
+      <div class="code-logo" style="margin-bottom:4px">SpeakUP<em>!</em></div>
+      <p class="muted" style="margin-bottom:40px;font-size:15px">IELTS PEAK · Official Speaking Assessment</p>
+      <div class="card">
+        <h3 style="margin-bottom:6px">Enter Access Code</h3>
+        <p class="muted" style="margin-bottom:24px;font-size:13px">Your teacher will give you a personal access code.</p>
+        <div class="err" id="auth-err"></div>
+        <div class="field">
+          <label>Access Code</label>
+          <input type="text" id="access-code" placeholder="e.g. SPEAKUP2025"
+            autocomplete="off" autocapitalize="characters" spellcheck="false"
+            onkeydown="if(event.key==='Enter') verifyCode()">
+        </div>
+        <button class="btn btn-p btn-full" id="auth-btn" onclick="verifyCode()">Enter Test →</button>
+      </div>
+      <p class="muted" style="margin-top:20px;font-size:12px">© IELTS PEAK — All answers are private and only seen by your teacher.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+  SCREEN 1 — WELCOME
+════════════════════════════════════ -->
+<div class="screen" id="s-welcome">
+  <div class="nav">
+    <div class="logo">SpeakUP<em>!</em></div>
+    <span class="muted" id="w-greeting" style="font-size:13px"></span>
+  </div>
+  <div class="center">
+    <div style="text-align:center;max-width:540px;width:100%">
+      <div class="pill" style="margin-bottom:28px">IELTS PEAK — Official Speaking Test</div>
+      <h1 style="margin-bottom:16px">Are you ready to <span class="acc">speak?</span></h1>
+      <p style="color:var(--text2);font-size:17px;line-height:1.65;margin-bottom:36px">A full IELTS Speaking mock test with 3 parts. Your AI examiner will ask all the questions. Answer naturally — just like the real exam.</p>
+      <div class="stats" style="margin-bottom:28px">
+        <div class="stat"><div class="stat-n">3</div><div class="stat-l">Parts</div></div>
+        <div class="stat"><div class="stat-n" id="total-q-count">12</div><div class="stat-l">Questions</div></div>
+        <div class="stat"><div class="stat-n">~14</div><div class="stat-l">Minutes</div></div>
+      </div>
+      <div class="notice">
+        <strong>Before you begin:</strong> Find a quiet place. Use headphones if possible. Speak clearly and at a natural pace. You will be recorded — but only you and your teacher can access the results.
+      </div>
+      <div class="card" style="text-align:left;margin-bottom:24px">
+        <div class="field" style="margin-bottom:0">
+          <label>Your full name</label>
+          <input type="text" id="student-name" placeholder="e.g. Kamola Yusupova" autocomplete="name">
+        </div>
+      </div>
+      <button class="btn btn-p btn-lg" onclick="startTest()">Begin Test →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+  SCREEN 2 — PART INTRO
+════════════════════════════════════ -->
+<div class="screen" id="s-pstart">
+  <div class="nav">
+    <div class="logo">SpeakUP<em>!</em></div>
+    <span id="ps-name" class="muted"></span>
+  </div>
+  <div class="center" style="text-align:center">
+    <div id="ps-num" class="part-n">1</div>
+    <h2 id="ps-title" style="margin-bottom:14px;margin-top:8px">Part 1</h2>
+    <p id="ps-desc" class="muted" style="max-width:420px;margin:0 auto 12px;font-size:15px;line-height:1.7"></p>
+    <p id="ps-info" class="muted" style="margin-bottom:36px;font-size:13px"></p>
+    <div style="display:flex;align-items:center;gap:8px;justify-content:center">
+      <div class="dot dot-g" style="animation:none"></div>
+      <span class="muted" style="font-size:13px" id="ps-voice-status">Examiner is speaking...</span>
+    </div>
+    <button class="btn btn-p btn-lg" id="ps-btn" onclick="startPart()" style="margin-top:24px;opacity:0;transition:opacity .4s">Start →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+  SCREEN 3 — PART 2 PREP
+════════════════════════════════════ -->
+<div class="screen" id="s-prep">
+  <div class="nav">
+    <div class="logo">SpeakUP<em>!</em></div>
+    <span class="pill">Part 2 — Preparation</span>
+  </div>
+  <div class="center">
+    <div class="wrap">
+      <div style="text-align:center;margin-bottom:24px">
+        <p class="sec-title">Preparation time</p>
+        <div class="timer" id="prep-timer">1:00</div>
+        <p class="muted" style="margin-top:8px;font-size:13px">Read your topic card and make notes. Speaking begins automatically.</p>
+      </div>
+      <div class="cue" id="prep-cue"></div>
+      <button class="btn btn-g btn-full" onclick="skipPrep()">I'm ready — Start speaking now →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+  SCREEN 4 — QUESTION / RECORDING
+════════════════════════════════════ -->
+<div class="screen" id="s-question">
+  <div class="nav">
+    <div class="logo">SpeakUP<em>!</em></div>
+    <span class="pill" id="q-badge">Part 1</span>
+  </div>
+  <div style="padding:12px 28px 0">
+    <div class="wrap">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <span class="muted" style="font-size:13px" id="q-prog-lbl">Question 1 of 4</span>
+        <div class="status waiting" id="q-status">
+          <span class="dot dot-m" id="q-dot"></span>
+          <span id="q-status-txt">Examiner speaking...</span>
+        </div>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="q-prog" style="width:0%"></div></div>
+    </div>
+  </div>
+  <div class="center" style="padding-top:0">
+    <div class="wrap" style="text-align:center">
+      <div style="font-family:var(--fh);font-size:clamp(20px,4vw,28px);font-weight:600;line-height:1.35;margin-bottom:32px;min-height:80px;display:flex;align-items:center;justify-content:center" id="q-text"></div>
+      <div class="waveform" id="q-wave">
+        <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+        <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+        <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+        <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+      </div>
+      <div id="q-timer-wrap" style="margin:16px 0;min-height:60px;display:flex;align-items:center;justify-content:center">
+        <div class="timer" id="q-timer" style="opacity:0;transition:opacity .3s">2:00</div>
+      </div>
+      <button class="mic idle" id="mic-btn" onclick="toggleRec()" disabled>🎙</button>
+      <p class="muted" id="mic-hint" style="margin-top:14px;font-size:14px">Waiting for examiner...</p>
+      <div id="stop-btn-wrap" style="display:none;margin-top:24px">
+        <button class="btn btn-g" onclick="stopAndNext()">Done — Next question →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+  SCREEN 5 — PROCESSING
+════════════════════════════════════ -->
+<div class="screen" id="s-proc">
+  <div class="nav"><div class="logo">SpeakUP<em>!</em></div></div>
+  <div class="center">
+    <div style="text-align:center;max-width:460px;width:100%">
+      <div style="width:60px;height:60px;border-radius:50%;background:rgba(19,240,189,.1);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:26px">⚡</div>
+      <h2 style="margin-bottom:10px">Analysing your test</h2>
+      <p class="muted" style="margin-bottom:36px">Transcribing your answers and generating IELTS feedback…</p>
+      <div id="proc-steps" style="text-align:left"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+  SCREEN 6 — RESULTS
+════════════════════════════════════ -->
+<div class="screen" id="s-results">
+  <div class="nav">
+    <div class="logo">SpeakUP<em>!</em></div>
+    <button class="btn btn-g" onclick="restartTest()" style="font-size:13px;padding:8px 14px">New Test</button>
+  </div>
+  <div style="max-width:680px;margin:0 auto;padding:36px 24px 80px">
+
+    <!-- Header -->
+    <div style="text-align:center;margin-bottom:44px;padding-bottom:36px;border-bottom:1px solid var(--border)">
+      <p class="muted" id="r-name" style="margin-bottom:6px"></p>
+      <p class="muted" style="font-size:14px;margin-bottom:4px">Overall Estimated Band Score</p>
+      <div class="band-big" id="r-band">--</div>
+      <p id="r-comment" class="muted" style="margin-top:14px;font-size:15px;line-height:1.65;max-width:460px;margin-left:auto;margin-right:auto"></p>
+    </div>
+
+    <!-- Criteria -->
+    <p class="sec-title">Band Scores by Criterion</p>
+    <div class="crit-grid" id="r-crit"></div>
+
+    <!-- Playback -->
+    <div style="margin:32px 0 28px">
+      <p class="sec-title">Recording Playback</p>
+      <div class="player">
+        <button class="play-b" id="play-btn" onclick="togglePlay()">▶</button>
+        <div class="tl">
+          <div class="tl-track" id="tl-track" onclick="seekTl(event)">
+            <div class="tl-fill" id="tl-fill"></div>
+          </div>
+          <div class="tl-times">
+            <span id="tl-cur">0:00</span>
+            <span id="tl-tot">0:00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Answers -->
+    <p class="sec-title">Answer by Answer</p>
+    <div id="r-answers"></div>
+
+    <!-- Tips -->
+    <div style="margin-top:32px">
+      <p class="sec-title">Top Tips to Improve</p>
+      <div id="r-tips"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// CONFIGURATION — edit this section to customise the test
+// ══════════════════════════════════════════════════════════
+
+// Set to true once you've added ElevenLabs MP3 files to /audio/
+// File naming convention: p1-intro.mp3, p1-q1.mp3, p1-q2.mp3 ...
+//                         p2-intro.mp3, p2-cue.mp3
+//                         p3-intro.mp3, p3-q1.mp3, p3-q2.mp3 ...
+const USE_ELEVENLABS_AUDIO = false;
+
+// Question bank — edit freely
+const QB = {
+  topic: "Hometown & Travel",
+  part1: {
+    intro: "Good morning. My name is IELTS Peak examiner, and I'll be conducting your IELTS Speaking test today. First, could you tell me your full name? Thank you. In this first part I'd like to ask you some questions about yourself.",
+    questions: [
+      "Where are you from originally?",
+      "What do you like most about your hometown?",
+      "Has your hometown changed much in recent years?",
+      "Do you think you will continue living there in the future?"
+    ]
+  },
+  part2: {
+    intro: "Thank you. Now I'm going to give you a topic and I'd like you to talk about it for one to two minutes. Before you talk, you'll have one minute to think about what you're going to say. You can make notes if you wish. Here is your topic card.",
+    cue: {
+      topic: "Describe a memorable journey or trip you have taken.",
+      bullets: [
+        "Where you went",
+        "Who you went with",
+        "What you did there",
+        "And explain why this journey was so memorable for you"
+      ]
+    }
+  },
+  part3: {
+    intro: "We've been talking about travel and journeys. I'd now like to ask you some more general questions related to this topic.",
+    questions: [
+      "Why do you think people enjoy travelling to new places?",
+      "How has mass tourism affected local cultures and traditions?",
+      "Do you think travelling abroad is important for young people? Why?",
+      "How do you think the way people travel will change in the future?"
+    ]
+  }
+};
+
+// ══════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════
+let studentName = '';
+let currentPart = 1, currentQIdx = 0;
+let answers = [], cumDur = 0;
+let mr = null, chunks = [], recStart = 0, isRec = false;
+let recTmr = null, recSecs = 0;
+let prepTmr = null, prepSecs = 60;
+let audioEl = null, playIdx = 0, isPlaying = false, tlInterval = null;
+let feedback = null;
+let currentAudio = null; // for ElevenLabs MP3 playback
+
+// ══════════════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════════════
+const $ = id => document.getElementById(id);
+const show = id => {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+};
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const fmt = s => `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
+const post = (url, body) => fetch(url, {
+  method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
+});
+
+// ══════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════
+window.onload = () => {
+  const total = QB.part1.questions.length + 1 + QB.part3.questions.length;
+  $('total-q-count').textContent = total;
+  // Preload Web Speech voices
+  speechSynthesis.getVoices();
+  window.speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+};
+
+// ══════════════════════════════════════════════════════════
+// ACCESS CODE
+// ══════════════════════════════════════════════════════════
+async function verifyCode() {
+  const code = $('access-code').value.trim();
+  if (!code) return;
+  const btn = $('auth-btn');
+  btn.disabled = true; btn.textContent = 'Checking…';
+  const errEl = $('auth-err');
+  errEl.classList.remove('show');
+
+  try {
+    const res = await post('/api/auth', { code });
+    const data = await res.json();
+    if (data.ok) {
+      show('s-welcome');
+    } else {
+      errEl.textContent = data.message || 'Invalid code.';
+      errEl.classList.add('show');
+      btn.disabled = false; btn.textContent = 'Enter Test →';
+    }
+  } catch(e) {
+    // Fallback: if running locally without Vercel, allow any code
+    if (window.location.protocol === 'file:' || window.location.hostname === 'localhost') {
+      show('s-welcome');
+    } else {
+      errEl.textContent = 'Connection error. Please try again.';
+      errEl.classList.add('show');
+      btn.disabled = false; btn.textContent = 'Enter Test →';
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// START TEST
+// ══════════════════════════════════════════════════════════
+function startTest() {
+  studentName = $('student-name').value.trim();
+  if (!studentName) { alert('Please enter your name to begin.'); return; }
+  $('w-greeting').textContent = studentName;
+  answers = []; cumDur = 0; currentPart = 1; currentQIdx = 0;
+  showPartIntro(1);
+}
+
+// ══════════════════════════════════════════════════════════
+// PART INTRO
+// ══════════════════════════════════════════════════════════
+function showPartIntro(part) {
+  currentPart = part; currentQIdx = 0;
+  const titles = {1:'Part 1 — Introduction & Interview',2:'Part 2 — Individual Long Turn',3:'Part 3 — Two-way Discussion'};
+  const descs  = {1:QB.part1.intro, 2:QB.part2.intro, 3:QB.part3.intro};
+  const infos  = {
+    1:`${QB.part1.questions.length} questions · up to 90 seconds each`,
+    2:'1 minute preparation · up to 2 minutes speaking',
+    3:`${QB.part3.questions.length} questions · open discussion`
+  };
+  $('ps-name').textContent = studentName;
+  $('ps-num').textContent = part;
+  $('ps-title').textContent = titles[part];
+  $('ps-desc').textContent = '';
+  $('ps-info').textContent = infos[part];
+  $('ps-btn').style.opacity = '0';
+  $('ps-voice-status').textContent = 'Examiner is speaking...';
+  show('s-pstart');
+
+  speak(descs[part], `p${part}-intro`, () => {
+    $('ps-btn').style.opacity = '1';
+    $('ps-voice-status').textContent = 'Ready when you are.';
+  });
+}
+
+function startPart() {
+  stopSpeech();
+  currentPart === 2 ? showPrep() : nextQuestion();
+}
+
+// ══════════════════════════════════════════════════════════
+// PART 2 PREP
+// ══════════════════════════════════════════════════════════
+function showPrep() {
+  prepSecs = 60;
+  const c = QB.part2.cue;
+  $('prep-cue').innerHTML = `
+    <div class="cue-label">Your topic card</div>
+    <p>${c.topic}</p>
+    <ul>${c.bullets.map(b=>`<li>${b}</li>`).join('')}</ul>`;
+  updatePrepTimer();
+  show('s-prep');
+  prepTmr = setInterval(() => {
+    prepSecs--;
+    updatePrepTimer();
+    if (prepSecs <= 0) { clearInterval(prepTmr); nextQuestion(); }
+  }, 1000);
+}
+
+function updatePrepTimer() {
+  const el = $('prep-timer');
+  el.textContent = fmt(prepSecs);
+  el.className = 'timer' + (prepSecs<=10?' danger':prepSecs<=20?' warn':'');
+}
+function skipPrep() { clearInterval(prepTmr); nextQuestion(); }
+
+// ══════════════════════════════════════════════════════════
+// QUESTIONS
+// ══════════════════════════════════════════════════════════
+function getQs() {
+  return currentPart===1 ? QB.part1.questions :
+         currentPart===2 ? [QB.part2.cue.topic] :
+         QB.part3.questions;
+}
+
+function nextQuestion() {
+  const qs = getQs();
+  if (currentQIdx >= qs.length) {
+    if (currentPart < 3) showPartIntro(currentPart + 1);
+    else startProcessing();
+    return;
+  }
+  const q = qs[currentQIdx];
+  const audioKey = `p${currentPart}-q${currentQIdx+1}`;
+  $('q-badge').textContent = `Part ${currentPart}`;
+  $('q-prog-lbl').textContent = `Question ${currentQIdx+1} of ${qs.length}`;
+  $('q-prog').style.width = `${(currentQIdx/qs.length)*100}%`;
+  $('q-text').textContent = q;
+  $('q-timer').style.opacity = '0';
+  $('stop-btn-wrap').style.display = 'none';
+  $('q-wave').classList.remove('live');
+  setStatus('waiting','Examiner speaking…');
+  const mb = $('mic-btn');
+  mb.disabled = true; mb.className = 'mic idle'; mb.textContent = '🎙';
+  $('mic-hint').textContent = 'Waiting for examiner…';
+  show('s-question');
+  speak(q, audioKey, () => {
+    setStatus('waiting','Your turn — press mic to answer');
+    mb.disabled = false;
+    $('mic-hint').textContent = 'Press the mic button to start recording';
+  });
+}
+
+function setStatus(type, txt) {
+  $('q-status-txt').textContent = txt;
+  $('q-status').className = 'status ' + type;
+  $('q-dot').className = 'dot ' + (type==='recording'?'dot-r':type==='playing'?'dot-g':'dot-m');
+}
+
+// ══════════════════════════════════════════════════════════
+// VOICE — ElevenLabs MP3 with Web Speech fallback
+// ══════════════════════════════════════════════════════════
+function speak(text, audioKey, cb) {
+  stopSpeech();
+  if (USE_ELEVENLABS_AUDIO) {
+    currentAudio = new Audio(`/audio/${audioKey}.mp3`);
+    currentAudio.onended = () => { currentAudio = null; if(cb) cb(); };
+    currentAudio.onerror = () => {
+      // MP3 not found — fall back to Web Speech
+      currentAudio = null;
+      webSpeak(text, cb);
+    };
+    currentAudio.play().catch(() => webSpeak(text, cb));
+  } else {
+    webSpeak(text, cb);
+  }
+}
+
+function webSpeak(text, cb) {
+  if (!text) { if(cb) cb(); return; }
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 0.87; u.pitch = 1.0;
+  const vs = speechSynthesis.getVoices();
+  const v = vs.find(v=>v.lang==='en-GB'&&v.name.toLowerCase().includes('female'))
+          || vs.find(v=>v.lang==='en-GB')
+          || vs.find(v=>v.lang.startsWith('en'));
+  if(v) u.voice = v;
+  if(cb) u.onend = cb;
+  speechSynthesis.speak(u);
+}
+
+function stopSpeech() {
+  speechSynthesis.cancel();
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+}
+
+// ══════════════════════════════════════════════════════════
+// RECORDING
+// ══════════════════════════════════════════════════════════
+async function toggleRec() {
+  if (isRec) await stopRecording();
+  else await startRecording();
+}
+
+async function startRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    chunks = [];
+    mr = new MediaRecorder(stream, {mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/ogg'});
+    mr.ondataavailable = e => { if(e.data.size>0) chunks.push(e.data); };
+    mr.start(100);
+    isRec = true; recStart = Date.now();
+    recSecs = currentPart===2 ? 120 : 90;
+    $('mic-btn').className = 'mic rec'; $('mic-btn').textContent = '⏹';
+    $('mic-hint').textContent = 'Recording… Press to stop early';
+    $('q-wave').classList.add('live');
+    $('stop-btn-wrap').style.display = 'block';
+    setStatus('recording','Recording your answer…');
+    $('q-timer').style.opacity = '1'; updateRecTimer();
+    recTmr = setInterval(() => {
+      recSecs--; updateRecTimer();
+      if (recSecs<=0) { clearInterval(recTmr); stopAndNext(); }
+    }, 1000);
+  } catch(e) {
+    alert('Microphone access denied. Please allow microphone access in your browser settings and refresh.');
+  }
+}
+
+function updateRecTimer() {
+  const el = $('q-timer');
+  el.textContent = fmt(recSecs);
+  el.className = 'timer'+(recSecs<=10?' danger':recSecs<=30?' warn':'');
+}
+
+function stopRecording() {
+  return new Promise(res => {
+    if (!mr || !isRec) { res(null); return; }
+    clearInterval(recTmr);
+    mr.onstop = () => {
+      const mimeType = mr.mimeType || 'audio/webm';
+      const blob = new Blob(chunks, {type: mimeType});
+      const dur = (Date.now() - recStart) / 1000;
+      const url = URL.createObjectURL(blob);
+      const qs = getQs();
+      answers.push({ part: currentPart, qText: qs[currentQIdx], blob, url, duration: dur, startSec: cumDur, transcript: '' });
+      cumDur += dur;
+      mr.stream.getTracks().forEach(t => t.stop());
+      isRec = false;
+      res(blob);
+    };
+    mr.stop();
+  });
+}
+
+async function stopAndNext() {
+  if (!isRec) return;
+  stopSpeech();
+  await stopRecording();
+  currentQIdx++;
+  $('mic-btn').className='mic idle'; $('mic-btn').textContent='🎙';
+  $('stop-btn-wrap').style.display='none';
+  $('q-wave').classList.remove('live');
+  nextQuestion();
+}
+
+// ══════════════════════════════════════════════════════════
+// PROCESSING — Groq via Vercel API routes
+// ══════════════════════════════════════════════════════════
+function renderProc(steps) {
+  $('proc-steps').innerHTML = steps.map(s => {
+    const icon = s.status==='done'?'✓':s.status==='active'?'<div class="spin"></div>':'○';
+    return `<div class="pstep ${s.status||''}"><span class="pstep-icon">${icon}</span><span>${s.label}</span></div>`;
+  }).join('');
+}
+
+async function startProcessing() {
+  show('s-proc');
+  const steps = [
+    ...answers.map((_,i)=>({label:`Transcribing answer ${i+1}`,status:'pending'})),
+    {label:'Generating IELTS band scores & feedback',status:'pending'}
+  ];
+  renderProc(steps);
+
+  // Transcribe via /api/transcribe
+  for(let i=0;i<answers.length;i++){
+    steps[i].status='active'; renderProc(steps);
+    try {
+      const fd = new FormData();
+      fd.append('file', answers[i].blob, `answer_${i+1}.webm`);
+      fd.append('model', 'whisper-large-v3');
+      fd.append('language', 'en');
+      fd.append('response_format', 'json');
+
+      // Try /api/transcribe first (Vercel deployment)
+      // Falls back to direct Groq if local
+      let transcript = '';
+      try {
+        const r = await fetch('/api/transcribe', {method:'POST', body:fd});
+        if(r.ok) { const d=await r.json(); transcript=d.text||''; }
+        else throw new Error('api route failed');
+      } catch {
+        transcript = '[Transcription unavailable — deploy to Vercel for full functionality]';
+      }
+      answers[i].transcript = transcript;
+    } catch(e) {
+      answers[i].transcript = '[Transcription error]';
+    }
+    steps[i].status='done'; renderProc(steps);
+  }
+
+  // AI Feedback via /api/feedback
+  steps[steps.length-1].status='active'; renderProc(steps);
+  try {
+    const r = await post('/api/feedback', {
+      studentName,
+      answers: answers.map(a=>({part:a.part,qText:a.qText,transcript:a.transcript}))
+    });
+    if(r.ok) feedback = await r.json();
+    else throw new Error();
+  } catch {
+    feedback = fallbackFeedback();
+  }
+  steps[steps.length-1].status='done'; renderProc(steps);
+
+  await sleep(600);
+  showResults();
+}
+
+function fallbackFeedback() {
+  return {
+    overall_band:0,
+    criteria:{
+      fluency_coherence:{band:0,feedback:'Feedback requires a live deployment on Vercel.'},
+      lexical_resource:{band:0,feedback:'Please deploy this project to Vercel to enable AI scoring.'},
+      grammatical_range:{band:0,feedback:'The API routes work once deployed — not when opened as a local file.'},
+      pronunciation:{band:0,feedback:'Pronunciation analysis will be available after deployment.'}
+    },
+    per_answer: answers.map((_,i)=>({index:i,strengths:'N/A',areas_to_improve:'N/A',band_estimate:0})),
+    overall_comment:'To enable full AI feedback, deploy this project to Vercel and set your GROQ_API_KEY environment variable. The recording and playback features work locally.',
+    top_tips:['Deploy to Vercel to enable AI feedback','Set GROQ_API_KEY in Vercel environment variables','Set ACCESS_CODE in Vercel environment variables']
+  };
+}
+
+// ══════════════════════════════════════════════════════════
+// RESULTS
+// ══════════════════════════════════════════════════════════
+const CRIT_NAMES = {
+  fluency_coherence:'Fluency & Coherence',
+  lexical_resource:'Lexical Resource',
+  grammatical_range:'Grammatical Range & Accuracy',
+  pronunciation:'Pronunciation'
+};
+
+function showResults() {
+  show('s-results');
+  $('r-name').textContent = `${studentName} — IELTS Speaking Mock Test`;
+  $('r-band').textContent = feedback.overall_band > 0 ? feedback.overall_band.toFixed(1) : '--';
+  $('r-comment').textContent = feedback.overall_comment;
+
+  $('r-crit').innerHTML = Object.entries(feedback.criteria).map(([k,v])=>`
+    <div class="crit">
+      <div class="crit-lbl">${CRIT_NAMES[k]||k}</div>
+      <div class="crit-sc">${v.band>0?v.band.toFixed(1):'--'}</div>
+      <div class="crit-bar"><div class="crit-bar-f" style="width:${v.band>0?(v.band/9)*100:0}%"></div></div>
+      <div class="crit-fb">${v.feedback}</div>
+    </div>`).join('');
+
+  const total = answers.reduce((s,a)=>s+a.duration,0);
+  $('tl-tot').textContent = fmt(total);
+
+  $('r-answers').innerHTML = answers.map((a,i)=>{
+    const fb = feedback.per_answer?.find(p=>p.index===i);
+    return `<div class="ans-card" id="ac-${i}" onclick="playFrom(${i})">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+        <div class="ans-meta">Part ${a.part} · Q${i+1} · ▶ ${fmt(a.startSec)}</div>
+        ${fb&&fb.band_estimate>0?`<div class="ans-band">${fb.band_estimate.toFixed(1)}</div>`:''}
+      </div>
+      <div class="ans-q">${a.qText}</div>
+      <div class="ans-t">"${a.transcript||'No transcript available'}"</div>
+      ${fb?`<div class="fb-row">
+        <div class="fb-box fb-box-g"><div class="fb-box-lbl g">Strengths</div><p>${fb.strengths}</p></div>
+        <div class="fb-box fb-box-w"><div class="fb-box-lbl w">Improve</div><p>${fb.areas_to_improve}</p></div>
+      </div>`:''}
+    </div>`;
+  }).join('');
+
+  $('r-tips').innerHTML = (feedback.top_tips||[]).map((t,i)=>`
+    <div class="tip"><span class="tip-n">${String(i+1).padStart(2,'0')}</span><span>${t}</span></div>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════
+// AUDIO PLAYBACK (student recording timeline)
+// ══════════════════════════════════════════════════════════
+function togglePlay() {
+  if (isPlaying) pausePlay();
+  else if (audioEl) resumePlay();
+  else playFrom(0);
+}
+function resumePlay() { audioEl.play(); isPlaying=true; $('play-btn').textContent='⏸'; startTlUpdate(); }
+function pausePlay() { if(audioEl) audioEl.pause(); isPlaying=false; $('play-btn').textContent='▶'; clearInterval(tlInterval); }
+
+function playFrom(idx) {
+  if(audioEl){audioEl.pause();audioEl.src='';}
+  clearInterval(tlInterval);
+  playIdx=idx; isPlaying=true; $('play-btn').textContent='⏸';
+  document.querySelectorAll('.ans-card').forEach((el,i)=>el.classList.toggle('active-play',i===idx));
+  audioEl = new Audio(answers[idx].url);
+  audioEl.play();
+  audioEl.onended = () => {
+    if(playIdx < answers.length-1) playFrom(playIdx+1);
+    else { isPlaying=false; $('play-btn').textContent='▶'; clearInterval(tlInterval); }
+  };
+  startTlUpdate();
+}
+
+function startTlUpdate() {
+  clearInterval(tlInterval);
+  const total = answers.reduce((s,a)=>s+a.duration,0);
+  tlInterval = setInterval(()=>{
+    if(!audioEl) return;
+    const offset = answers.slice(0,playIdx).reduce((s,a)=>s+a.duration,0);
+    const cur = offset + audioEl.currentTime;
+    $('tl-fill').style.width=`${(cur/total)*100}%`;
+    $('tl-cur').textContent=fmt(cur);
+    let active=0;
+    for(let i=0;i<answers.length;i++) if(cur>=answers[i].startSec) active=i;
+    document.querySelectorAll('.ans-card').forEach((el,i)=>el.classList.toggle('active-play',i===active));
+  }, 120);
+}
+
+function seekTl(e) {
+  const pct = e.offsetX / $('tl-track').offsetWidth;
+  const total = answers.reduce((s,a)=>s+a.duration,0);
+  const target = pct * total;
+  let cumul = 0;
+  for(let i=0;i<answers.length;i++){
+    if(target < cumul+answers[i].duration){
+      playFrom(i);
+      setTimeout(()=>{ if(audioEl) audioEl.currentTime=target-cumul; },80);
+      return;
+    }
+    cumul+=answers[i].duration;
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// RESTART
+// ══════════════════════════════════════════════════════════
+function restartTest() {
+  if(audioEl){audioEl.pause();audioEl=null;}
+  clearInterval(tlInterval);
+  stopSpeech();
+  answers=[]; feedback=null; isPlaying=false; cumDur=0;
+  $('student-name').value='';
+  show('s-welcome');
+}
+</script>
+</body>
+</html>
