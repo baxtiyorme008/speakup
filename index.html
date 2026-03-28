@@ -143,7 +143,7 @@ h3{font-family:var(--fh);font-size:18px;font-weight:600}
   <div class="center">
     <div style="text-align:center;max-width:420px;width:100%">
       <div class="code-logo" style="margin-bottom:4px">SpeakUP<em>!</em></div>
-      <p class="muted" style="margin-bottom:40px;font-size:15px">Alisher's students · Official Speaking Assessment</p>
+      <p class="muted" style="margin-bottom:40px;font-size:15px">IELTS PEAK · Official Speaking Assessment</p>
       <div class="card">
         <h3 style="margin-bottom:6px">Enter Access Code</h3>
         <p class="muted" style="margin-bottom:24px;font-size:13px">Your teacher will give you a personal access code.</p>
@@ -156,7 +156,7 @@ h3{font-family:var(--fh);font-size:18px;font-weight:600}
         </div>
         <button class="btn btn-p btn-full" id="auth-btn" onclick="verifyCode()">Enter Test →</button>
       </div>
-      <p class="muted" style="margin-top:20px;font-size:12px">© Alisher's students — All answers are private and only seen by your teacher.</p>
+      <p class="muted" style="margin-top:20px;font-size:12px">© IELTS PEAK — All answers are private and only seen by your teacher.</p>
     </div>
   </div>
 </div>
@@ -171,7 +171,7 @@ h3{font-family:var(--fh);font-size:18px;font-weight:600}
   </div>
   <div class="center">
     <div style="text-align:center;max-width:540px;width:100%">
-      <div class="pill" style="margin-bottom:28px">Alisher's students — Official Speaking Test</div>
+      <div class="pill" style="margin-bottom:28px">IELTS PEAK — Official Speaking Test</div>
       <h1 style="margin-bottom:16px">Are you ready to <span class="acc">speak?</span></h1>
       <p style="color:var(--text2);font-size:17px;line-height:1.65;margin-bottom:36px">A full IELTS Speaking mock test with 3 parts. Your AI examiner will ask all the questions. Answer naturally — just like the real exam.</p>
       <div class="stats" style="margin-bottom:28px">
@@ -358,7 +358,7 @@ const USE_ELEVENLABS_AUDIO = false;
 const QB = {
   topic: "Hometown & Travel",
   part1: {
-    intro: "Good morning. My name is Alisher Abduvohobov, and I'll be conducting your IELTS Speaking test today. First, could you tell me your full name? Thank you. In this first part I'd like to ask you some questions about yourself.",
+    intro: "Good morning. My name is IELTS Peak examiner, and I'll be conducting your IELTS Speaking test today. First, could you tell me your full name? Thank you. In this first part I'd like to ask you some questions about yourself.",
     questions: [
       "Where are you from originally?",
       "What do you like most about your hometown?",
@@ -430,11 +430,148 @@ window.onload = () => {
 // ══════════════════════════════════════════════════════════
 // ACCESS CODE
 // ══════════════════════════════════════════════════════════
-// ── Student roster — edit codes and names here ──
+// ── Student roster ──
 const STUDENTS = [
-  { code: "SPEAKUP2025", name: "" },
-  // Add your 140 students below:
-  // { code: "ST-12345", name: "Kamola Yusupova" },
+  { code: "ST-00330", name: "A01" },
+  { code: "ST-00978", name: "A02" },
+  { code: "ST-01429", name: "A03" },
+  { code: "ST-02563", name: "A04" },
+  { code: "ST-02606", name: "A05" },
+  { code: "ST-04653", name: "A06" },
+  { code: "ST-05641", name: "A07" },
+  { code: "ST-06088", name: "A08" },
+  { code: "ST-06513", name: "A09" },
+  { code: "ST-06990", name: "A10" },
+  { code: "ST-07991", name: "A11" },
+  { code: "ST-09805", name: "A12" },
+  { code: "ST-10310", name: "A13" },
+  { code: "ST-10341", name: "A14" },
+  { code: "ST-10433", name: "A15" },
+  { code: "ST-11615", name: "A16" },
+  { code: "ST-11718", name: "A17" },
+  { code: "ST-12269", name: "A18" },
+  { code: "ST-12411", name: "A19" },
+  { code: "ST-15869", name: "A20" },
+  { code: "ST-16272", name: "A21" },
+  { code: "ST-16697", name: "A22" },
+  { code: "ST-16934", name: "A23" },
+  { code: "ST-17810", name: "A24" },
+  { code: "ST-18384", name: "A25" },
+  { code: "ST-19314", name: "A26" },
+  { code: "ST-19374", name: "A27" },
+  { code: "ST-21489", name: "A28" },
+  { code: "ST-21819", name: "A29" },
+  { code: "ST-21913", name: "A30" },
+  { code: "ST-22362", name: "A31" },
+  { code: "ST-22782", name: "A32" },
+  { code: "ST-23226", name: "A33" },
+  { code: "ST-24190", name: "A34" },
+  { code: "ST-24751", name: "A35" },
+  { code: "ST-25135", name: "A36" },
+  { code: "ST-26204", name: "A37" },
+  { code: "ST-27298", name: "A38" },
+  { code: "ST-28710", name: "A39" },
+  { code: "ST-28809", name: "A40" },
+  { code: "ST-29946", name: "A41" },
+  { code: "ST-31165", name: "A42" },
+  { code: "ST-31509", name: "A43" },
+  { code: "ST-31647", name: "A44" },
+  { code: "ST-31665", name: "A45" },
+  { code: "ST-32003", name: "A46" },
+  { code: "ST-32016", name: "A47" },
+  { code: "ST-32764", name: "A48" },
+  { code: "ST-32870", name: "A49" },
+  { code: "ST-33872", name: "A50" },
+  { code: "ST-34873", name: "A51" },
+  { code: "ST-35346", name: "A52" },
+  { code: "ST-35348", name: "A53" },
+  { code: "ST-35615", name: "A54" },
+  { code: "ST-37346", name: "A55" },
+  { code: "ST-38637", name: "A56" },
+  { code: "ST-38849", name: "A57" },
+  { code: "ST-38908", name: "A58" },
+  { code: "ST-39537", name: "A59" },
+  { code: "ST-40052", name: "A60" },
+  { code: "ST-40196", name: "A61" },
+  { code: "ST-41928", name: "A62" },
+  { code: "ST-42160", name: "A63" },
+  { code: "ST-42784", name: "A64" },
+  { code: "ST-42786", name: "A65" },
+  { code: "ST-43039", name: "A66" },
+  { code: "ST-43303", name: "A67" },
+  { code: "ST-45581", name: "A68" },
+  { code: "ST-46564", name: "A69" },
+  { code: "ST-47143", name: "A70" },
+  { code: "ST-47468", name: "A71" },
+  { code: "ST-48963", name: "A72" },
+  { code: "ST-49593", name: "A73" },
+  { code: "ST-49663", name: "A74" },
+  { code: "ST-50533", name: "A75" },
+  { code: "ST-50671", name: "A76" },
+  { code: "ST-51343", name: "A77" },
+  { code: "ST-51834", name: "A78" },
+  { code: "ST-52553", name: "A79" },
+  { code: "ST-52991", name: "A80" },
+  { code: "ST-54235", name: "A81" },
+  { code: "ST-55698", name: "A82" },
+  { code: "ST-57015", name: "A83" },
+  { code: "ST-58685", name: "A84" },
+  { code: "ST-59407", name: "A85" },
+  { code: "ST-60013", name: "A86" },
+  { code: "ST-61939", name: "A87" },
+  { code: "ST-62473", name: "A88" },
+  { code: "ST-62704", name: "A89" },
+  { code: "ST-64170", name: "A90" },
+  { code: "ST-65414", name: "A91" },
+  { code: "ST-65726", name: "A92" },
+  { code: "ST-66701", name: "A93" },
+  { code: "ST-66889", name: "A94" },
+  { code: "ST-66909", name: "A95" },
+  { code: "ST-67054", name: "A96" },
+  { code: "ST-67242", name: "A97" },
+  { code: "ST-67736", name: "A98" },
+  { code: "ST-69653", name: "A99" },
+  { code: "ST-69957", name: "A100" },
+  { code: "ST-70656", name: "A101" },
+  { code: "ST-72343", name: "A102" },
+  { code: "ST-72774", name: "A103" },
+  { code: "ST-73375", name: "A104" },
+  { code: "ST-73829", name: "A105" },
+  { code: "ST-74016", name: "A106" },
+  { code: "ST-75564", name: "A107" },
+  { code: "ST-77387", name: "A108" },
+  { code: "ST-78713", name: "A109" },
+  { code: "ST-78895", name: "A110" },
+  { code: "ST-79176", name: "A111" },
+  { code: "ST-79868", name: "A112" },
+  { code: "ST-80112", name: "A113" },
+  { code: "ST-80132", name: "A114" },
+  { code: "ST-80443", name: "A115" },
+  { code: "ST-80531", name: "A116" },
+  { code: "ST-80598", name: "A117" },
+  { code: "ST-81618", name: "A118" },
+  { code: "ST-82081", name: "A119" },
+  { code: "ST-82366", name: "A120" },
+  { code: "ST-82449", name: "A121" },
+  { code: "ST-82814", name: "A122" },
+  { code: "ST-83172", name: "A123" },
+  { code: "ST-83465", name: "A124" },
+  { code: "ST-83503", name: "A125" },
+  { code: "ST-83930", name: "A126" },
+  { code: "ST-84514", name: "A127" },
+  { code: "ST-84801", name: "A128" },
+  { code: "ST-86518", name: "A129" },
+  { code: "ST-87603", name: "A130" },
+  { code: "ST-89325", name: "A131" },
+  { code: "ST-90916", name: "A132" },
+  { code: "ST-91905", name: "A133" },
+  { code: "ST-92327", name: "A134" },
+  { code: "ST-93676", name: "A135" },
+  { code: "ST-94026", name: "A136" },
+  { code: "ST-95148", name: "A137" },
+  { code: "ST-97376", name: "A138" },
+  { code: "ST-98084", name: "A139" },
+  { code: "ST-99854", name: "A140" }
 ];
 
 function verifyCode() {
