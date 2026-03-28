@@ -145,18 +145,18 @@ h3{font-family:var(--fh);font-size:18px;font-weight:600}
       <div class="code-logo" style="margin-bottom:4px">SpeakUP<em>!</em></div>
       <p class="muted" style="margin-bottom:40px;font-size:15px">Alisher's students · Official Speaking Assessment</p>
       <div class="card">
-        <h3 style="margin-bottom:6px">Enter Access Code</h3>
-        <p class="muted" style="margin-bottom:24px;font-size:13px">Your teacher will give you a personal access code.</p>
+        <h3 style="margin-bottom:6px">Maxsus kodingizni kiriting</h3>
+        <p class="muted" style="margin-bottom:24px;font-size:13px">Ustozingiz — Alisher sizga maxsus kod bergan.</p>
         <div class="err" id="auth-err"></div>
         <div class="field">
-          <label>Access Code</label>
+          <label>MAXSUS KOD</label>
           <input type="text" id="access-code" placeholder="e.g. SPEAKUP2025"
             autocomplete="off" autocapitalize="characters" spellcheck="false"
             onkeydown="if(event.key==='Enter') verifyCode()">
         </div>
-        <button class="btn btn-p btn-full" id="auth-btn" onclick="verifyCode()">Enter Test →</button>
+        <button class="btn btn-p btn-full" id="auth-btn" onclick="verifyCode()">Mock Testni Boshlash →</button>
       </div>
-      <p class="muted" style="margin-top:20px;font-size:12px">© Alisher's students — All answers are private and only seen by your teacher.</p>
+      <p class="muted" style="margin-top:20px;font-size:12px">© Alisher o'quvchilari — Barcha savollar shifrlangan va ularni faqat ustozingiz ko'ra oladi.</p>
     </div>
   </div>
 </div>
@@ -358,7 +358,7 @@ const USE_ELEVENLABS_AUDIO = false;
 const QB = {
   topic: "Hometown & Travel",
   part1: {
-    intro: "Good morning. My name is Alisher Abduvohobov, and I'll be conducting your IELTS Speaking test today. First, could you tell me your full name? Thank you. In this first part I'd like to ask you some questions about yourself.",
+    intro: "Good morning. My name is Alisher, and I'll be conducting your IELTS Speaking test today. First, could you tell me your full name? Thank you. In this first part I'd like to ask you some questions about yourself.",
     questions: [
       "Where are you from originally?",
       "What do you like most about your hometown?",
@@ -585,7 +585,7 @@ function verifyCode() {
   );
 
   if (!student) {
-    errEl.textContent = 'Code not found. Please check with your teacher.';
+    errEl.textContent = 'Siz kiritgan kod xato. Ustozingiz bergan kodni kiriting.';
     errEl.classList.add('show');
     return;
   }
