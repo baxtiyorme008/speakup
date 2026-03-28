@@ -143,7 +143,7 @@ h3{font-family:var(--fh);font-size:18px;font-weight:600}
   <div class="center">
     <div style="text-align:center;max-width:420px;width:100%">
       <div class="code-logo" style="margin-bottom:4px">SpeakUP<em>!</em></div>
-      <p class="muted" style="margin-bottom:40px;font-size:15px">Alisher's students · Official Speaking Assessment</p>
+      <p class="muted" style="margin-bottom:40px;font-size:15px">IELTS PEAK · Official Speaking Assessment</p>
       <div class="card">
         <h3 style="margin-bottom:6px">Enter Access Code</h3>
         <p class="muted" style="margin-bottom:24px;font-size:13px">Your teacher will give you a personal access code.</p>
@@ -156,7 +156,7 @@ h3{font-family:var(--fh);font-size:18px;font-weight:600}
         </div>
         <button class="btn btn-p btn-full" id="auth-btn" onclick="verifyCode()">Enter Test →</button>
       </div>
-      <p class="muted" style="margin-top:20px;font-size:12px">© Alisher's students — All answers are private and only seen by your teacher.</p>
+      <p class="muted" style="margin-top:20px;font-size:12px">© IELTS PEAK — All answers are private and only seen by your teacher.</p>
     </div>
   </div>
 </div>
@@ -171,7 +171,7 @@ h3{font-family:var(--fh);font-size:18px;font-weight:600}
   </div>
   <div class="center">
     <div style="text-align:center;max-width:540px;width:100%">
-      <div class="pill" style="margin-bottom:28px">Alisher's students — Official Speaking Test</div>
+      <div class="pill" style="margin-bottom:28px">IELTS PEAK — Official Speaking Test</div>
       <h1 style="margin-bottom:16px">Are you ready to <span class="acc">speak?</span></h1>
       <p style="color:var(--text2);font-size:17px;line-height:1.65;margin-bottom:36px">A full IELTS Speaking mock test with 3 parts. Your AI examiner will ask all the questions. Answer naturally — just like the real exam.</p>
       <div class="stats" style="margin-bottom:28px">
@@ -358,7 +358,7 @@ const USE_ELEVENLABS_AUDIO = false;
 const QB = {
   topic: "Hometown & Travel",
   part1: {
-    intro: "Good morning. My name is Alisher Abduvohobov, and I'll be conducting your IELTS Speaking test today. First, could you tell me your full name? Thank you. In this first part I'd like to ask you some questions about yourself.",
+    intro: "Good morning. My name is IELTS Peak examiner, and I'll be conducting your IELTS Speaking test today. First, could you tell me your full name? Thank you. In this first part I'd like to ask you some questions about yourself.",
     questions: [
       "Where are you from originally?",
       "What do you like most about your hometown?",
@@ -430,34 +430,38 @@ window.onload = () => {
 // ══════════════════════════════════════════════════════════
 // ACCESS CODE
 // ══════════════════════════════════════════════════════════
-async function verifyCode() {
+// ── Student roster — edit codes and names here ──
+const STUDENTS = [
+  { code: "SPEAKUP2025", name: "" },
+  // Add your 140 students below:
+  // { code: "ST-12345", name: "Kamola Yusupova" },
+];
+
+function verifyCode() {
   const code = $('access-code').value.trim();
   if (!code) return;
-  const btn = $('auth-btn');
-  btn.disabled = true; btn.textContent = 'Checking…';
   const errEl = $('auth-err');
   errEl.classList.remove('show');
 
-  try {
-    const res = await post('/api/auth', { code });
-    const data = await res.json();
-    if (data.ok) {
-      show('s-welcome');
-    } else {
-      errEl.textContent = data.message || 'Invalid code.';
-      errEl.classList.add('show');
-      btn.disabled = false; btn.textContent = 'Enter Test →';
-    }
-  } catch(e) {
-    // Fallback: if running locally without Vercel, allow any code
-    if (window.location.protocol === 'file:' || window.location.hostname === 'localhost') {
-      show('s-welcome');
-    } else {
-      errEl.textContent = 'Connection error. Please try again.';
-      errEl.classList.add('show');
-      btn.disabled = false; btn.textContent = 'Enter Test →';
-    }
+  const student = STUDENTS.find(
+    s => s.code.toUpperCase() === code.toUpperCase()
+  );
+
+  if (!student) {
+    errEl.textContent = 'Code not found. Please check with your teacher.';
+    errEl.classList.add('show');
+    return;
   }
+
+  if (student.name) {
+    const nameInput = $('student-name');
+    nameInput.value = student.name;
+    nameInput.readOnly = true;
+    nameInput.style.opacity = '0.6';
+    nameInput.style.cursor = 'not-allowed';
+  }
+
+  show('s-welcome');
 }
 
 // ══════════════════════════════════════════════════════════
