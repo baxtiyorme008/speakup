@@ -143,20 +143,20 @@ h3{font-family:var(--fh);font-size:18px;font-weight:600}
   <div class="center">
     <div style="text-align:center;max-width:420px;width:100%">
       <div class="code-logo" style="margin-bottom:4px">SpeakUP<em>!</em></div>
-      <p class="muted" style="margin-bottom:40px;font-size:15px">Alisher's students · Official Speaking Assessment</p>
+      <p class="muted" style="margin-bottom:40px;font-size:15px">IELTS PEAK · Official Speaking Assessment</p>
       <div class="card">
-        <h3 style="margin-bottom:6px">Maxsus kodingizni kiriting</h3>
-        <p class="muted" style="margin-bottom:24px;font-size:13px">Ustozingiz — Alisher sizga maxsus kod bergan.</p>
+        <h3 style="margin-bottom:6px">Enter Access Code</h3>
+        <p class="muted" style="margin-bottom:24px;font-size:13px">Your teacher will give you a personal access code.</p>
         <div class="err" id="auth-err"></div>
         <div class="field">
-          <label>MAXSUS KOD</label>
+          <label>Access Code</label>
           <input type="text" id="access-code" placeholder="e.g. SPEAKUP2025"
             autocomplete="off" autocapitalize="characters" spellcheck="false"
             onkeydown="if(event.key==='Enter') verifyCode()">
         </div>
-        <button class="btn btn-p btn-full" id="auth-btn" onclick="verifyCode()">Start Speaking Test →</button>
+        <button class="btn btn-p btn-full" id="auth-btn" onclick="verifyCode()">Enter Test →</button>
       </div>
-      <p class="muted" style="margin-top:20px;font-size:12px">© Barcha savollar shifrlangan va ularni faqat ustozingiz ko'ra oladi.</p>
+      <p class="muted" style="margin-top:20px;font-size:12px">© IELTS PEAK — All answers are private and only seen by your teacher.</p>
     </div>
   </div>
 </div>
@@ -171,7 +171,7 @@ h3{font-family:var(--fh);font-size:18px;font-weight:600}
   </div>
   <div class="center">
     <div style="text-align:center;max-width:540px;width:100%">
-      <div class="pill" style="margin-bottom:28px">Alisher's students — Official Speaking Test</div>
+      <div class="pill" style="margin-bottom:28px">IELTS PEAK — Official Speaking Test</div>
       <h1 style="margin-bottom:16px">Are you ready to <span class="acc">speak?</span></h1>
       <p style="color:var(--text2);font-size:17px;line-height:1.65;margin-bottom:36px">A full IELTS Speaking mock test with 3 parts. Your AI examiner will ask all the questions. Answer naturally — just like the real exam.</p>
       <div class="stats" style="margin-bottom:28px">
@@ -358,7 +358,7 @@ const USE_ELEVENLABS_AUDIO = false;
 const QB = {
   topic: "Hometown & Travel",
   part1: {
-    intro: "Good morning. My name is Alisher, and I'll be conducting your IELTS Speaking test today. First, could you tell me your full name? Thank you. In this first part I'd like to ask you some questions about yourself.",
+    intro: "Good morning. My name is IELTS Peak examiner, and I'll be conducting your IELTS Speaking test today. First, could you tell me your full name? Thank you. In this first part I'd like to ask you some questions about yourself.",
     questions: [
       "Where are you from originally?",
       "What do you like most about your hometown?",
@@ -420,6 +420,16 @@ const post = (url, body) => fetch(url, {
 // INIT
 // ══════════════════════════════════════════════════════════
 window.onload = () => {
+  // Show "Open in browser" banner if inside Telegram or in-app browser
+  const isTelegram = /Telegram/i.test(navigator.userAgent) || window.TelegramWebApp || window.Telegram;
+  const isInApp = isTelegram || /Instagram|FBAN|FBAV|Twitter/i.test(navigator.userAgent);
+  if (isInApp) {
+    const banner = document.createElement('div');
+    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#f59e0b;color:#1a0a00;padding:10px 16px;font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:var(--fb)';
+    banner.innerHTML = '<span>⚠️ Microphone requires a real browser</span><button onclick="window.open(window.location.href,\'_blank\')" style="background:#1a0a00;color:#f59e0b;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">Open in Browser →</button>';
+    document.body.prepend(banner);
+  }
+
   const total = QB.part1.questions.length + 1 + QB.part3.questions.length;
   $('total-q-count').textContent = total;
   // Preload Web Speech voices
@@ -585,7 +595,7 @@ function verifyCode() {
   );
 
   if (!student) {
-    errEl.textContent = 'Siz kiritgan kod xato. Ustozingiz bergan kodni kiriting.';
+    errEl.textContent = 'Code not found. Please check with your teacher.';
     errEl.classList.add('show');
     return;
   }
@@ -778,7 +788,29 @@ async function startRecording() {
       if (recSecs<=0) { clearInterval(recTmr); stopAndNext(); }
     }, 1000);
   } catch(e) {
-    alert('Microphone access denied. Please allow microphone access in your browser settings and refresh.');
+    const isTelegram = /Telegram/i.test(navigator.userAgent) || window.TelegramWebApp || window.Telegram;
+    const isInApp = isTelegram || /Instagram|FBAN|FBAV|Twitter|Line|WhatsApp/i.test(navigator.userAgent);
+    const errName = e.name || '';
+    let msg = '';
+    if (isInApp) {
+      const go = confirm('Microphone is blocked inside Telegram.\nTap OK to open in your browser (Chrome/Safari).');
+      if (go) window.open(window.location.href, '_blank');
+      return;
+    }
+    if (errName === 'NotAllowedError' || errName === 'PermissionDeniedError') {
+      msg = 'Microphone permission denied.\n\nFix: Click the lock icon in the address bar → set Microphone to Allow → refresh.';
+    } else if (errName === 'NotFoundError' || errName === 'DevicesNotFoundError') {
+      msg = 'No microphone found.\n\nPlease connect a microphone and refresh the page.';
+    } else if (errName === 'NotReadableError' || errName === 'TrackStartError') {
+      msg = 'Microphone is being used by another app.\n\nClose other apps using the mic (Zoom, Teams, etc.) and refresh.';
+    } else if (errName === 'OverconstrainedError') {
+      msg = 'Microphone settings not supported.\n\nTry a different browser (Chrome works best).';
+    } else if (errName === 'SecurityError') {
+      msg = 'Microphone blocked for security reasons.\n\nMake sure you are on https:// and using Chrome or Safari.';
+    } else {
+      msg = 'Microphone error: ' + (e.message || errName || 'Unknown error') + '\n\nTry refreshing the page or use Chrome.';
+    }
+    alert(msg);
   }
 }
 
