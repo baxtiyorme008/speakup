@@ -1,9 +1,8 @@
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
-  // ── Use Anthropic Claude for accurate IELTS scoring ──────────────────────
-  const anthropicKey = process.env.ANTHROPIC_API_KEY;
-  if (!anthropicKey) return res.status(500).json({ error: 'Anthropic API key not configured' });
+  const groqKey = process.env.GROQ_API_KEY;
+  if (!groqKey) return res.status(500).json({ error: 'API key not configured' });
 
   const { studentName, answers } = req.body;
   if (!answers || !answers.length) return res.status(400).json({ error: 'No answers provided' });
@@ -59,35 +58,35 @@ PRONUNCIATION (PR)
 - 5.0 — Mispronunciation is noticeable and occasionally causes misunderstanding. Limited range of phonological features.
 - 4.0 — Pronunciation often unclear. Heavy L1 accent. Listener must work hard to understand.
 
-PRONUNCIATION NOTE: Only a transcript is available — no audio. Score Pronunciation based on observable signals ONLY: word-level errors suggesting phonological confusion, non-standard patterns reflecting L1 interference, or unnatural phrasing. Do NOT assume good pronunciation just because the transcript reads fluently. Always note the score is estimated from transcript only. For Uzbek L1 speakers, apply extra scrutiny as common issues include vowel reduction and consonant cluster simplification.
+PRONUNCIATION NOTE: Only a transcript is available — no audio. Score Pronunciation based on observable signals ONLY: word-level errors suggesting phonological confusion, non-standard patterns reflecting L1 interference. Do NOT assume good pronunciation just because the transcript reads fluently. Always state the score is estimated from transcript only. For Uzbek L1 speakers, common issues include vowel reduction and consonant cluster simplification — apply appropriate scrutiny.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-PER-ANSWER FEEDBACK (NO SCORES)
+PER-ANSWER FEEDBACK (NO BAND SCORES)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-For each individual answer, provide ONLY:
-- One strength (cite specific words or phrases the candidate actually used)
-- One improvement (specific and actionable, not generic)
+For each individual answer provide ONLY:
+- One specific strength (cite actual words or phrases the candidate used)
+- One specific improvement (actionable, not generic)
 
-Do NOT assign band scores to individual answers. Individual band scores are meaningless and misleading.
+Do NOT assign band scores to individual answers. Individual scores are inaccurate and misleading.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-OUTPUT FORMAT (STRICT JSON ONLY)
+OUTPUT FORMAT — STRICT JSON ONLY
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Return ONLY valid JSON. No markdown. No preamble. No text outside the JSON.
 
 {
-  "overall_band": <number, e.g. 6.5>,
+  "overall_band": <number e.g. 6.5>,
   "overall_comment": "<3-4 sentences: overall level, what they do well, single most important area to improve>",
   "criteria": {
     "fluency_coherence": {
       "band": <number e.g. 7.0>,
-      "feedback": "<2-3 sentences citing specific transcript evidence>"
+      "feedback": "<2-3 sentences with specific transcript evidence>"
     },
     "lexical_resource": {
       "band": <number e.g. 7.0>,
-      "feedback": "<2-3 sentences citing specific vocabulary items used>"
+      "feedback": "<2-3 sentences citing specific vocabulary items>"
     },
     "grammatical_range": {
       "band": <number e.g. 6.0>,
@@ -101,14 +100,14 @@ Return ONLY valid JSON. No markdown. No preamble. No text outside the JSON.
   "per_answer": [
     {
       "index": <0-based integer>,
-      "strengths": "<1-2 sentences citing actual words/phrases used>",
+      "strengths": "<1-2 sentences citing actual words or phrases used>",
       "areas_to_improve": "<1-2 sentences, specific and actionable>"
     }
   ],
   "top_tips": [
-    "<specific actionable tip 1 referencing their actual performance>",
-    "<specific actionable tip 2 referencing their actual performance>",
-    "<specific actionable tip 3 referencing their actual performance>"
+    "<specific actionable tip 1 based on their actual performance>",
+    "<specific actionable tip 2 based on their actual performance>",
+    "<specific actionable tip 3 based on their actual performance>"
   ]
 }`;
 
@@ -123,41 +122,40 @@ Please evaluate the following IELTS Speaking test responses holistically:
 
 ${fullTranscript}`;
 
-  // ── Call Anthropic Claude API ─────────────────────────────────────────────
-  let claudeRes;
+  // ── Call Groq API ─────────────────────────────────────────────────────────
+  let groqRes;
   try {
-    claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
+    groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'x-api-key': anthropicKey,
-        'anthropic-version': '2023-06-01',
+        'Authorization': `Bearer ${groqKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 2000,
-        system: IELTS_SYS,
+        model: 'llama-3.3-70b-versatile',
         messages: [
+          { role: 'system', content: IELTS_SYS },
           { role: 'user', content: userMessage }
         ],
+        temperature: 0.1,
+        response_format: { type: 'json_object' }
       }),
     });
   } catch (err) {
-    return res.status(500).json({ error: 'Failed to reach Anthropic API', detail: err.message });
+    return res.status(500).json({ error: 'Failed to reach Groq API', detail: err.message });
   }
 
-  if (!claudeRes.ok) {
-    const errText = await claudeRes.text();
-    return res.status(claudeRes.status).json({ error: 'Anthropic API error', detail: errText });
+  if (!groqRes.ok) {
+    const errText = await groqRes.text();
+    return res.status(groqRes.status).json({ error: 'Groq API error', detail: errText });
   }
 
-  const claudeData = await claudeRes.json();
-  const rawText = claudeData.content?.[0]?.text || '';
+  const data = await groqRes.json();
+  const rawText = data.choices?.[0]?.message?.content || '';
 
   // ── Parse JSON safely ─────────────────────────────────────────────────────
   let parsed;
   try {
-    // Strip markdown fences if model adds them despite instructions
     const clean = rawText.replace(/```json|```/g, '').trim();
     parsed = JSON.parse(clean);
   } catch (err) {
