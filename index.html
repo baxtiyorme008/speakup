@@ -779,17 +779,27 @@ async function startRecording() {
     mr.ondataavailable = e => { if(e.data.size>0) chunks.push(e.data); };
     mr.start(100);
     isRec = true; recStart = Date.now();
-    recSecs = currentPart===2 ? 120 : 90;
+    recSecs = currentPart===2 ? 120 : 180;
     $('mic-btn').className = 'mic rec'; $('mic-btn').textContent = '⏹';
     $('mic-hint').textContent = 'Recording… Press to stop early';
     $('q-wave').classList.add('live');
     $('stop-btn-wrap').style.display = 'block';
     setStatus('recording','Recording your answer…');
-    $('q-timer').style.opacity = '1'; updateRecTimer();
-    recTmr = setInterval(() => {
-      recSecs--; updateRecTimer();
-      if (recSecs<=0) { clearInterval(recTmr); stopAndNext(); }
-    }, 1000);
+    if (currentPart === 2) {
+      // Part 2 only: show countdown timer
+      $('q-timer').style.opacity = '1'; updateRecTimer();
+      recTmr = setInterval(() => {
+        recSecs--; updateRecTimer();
+        if (recSecs<=0) { clearInterval(recTmr); stopAndNext(); }
+      }, 1000);
+    } else {
+      // Part 1 & 3: no timer shown, silent 3-minute safety cutoff only
+      $('q-timer').style.opacity = '0';
+      recTmr = setInterval(() => {
+        recSecs--;
+        if (recSecs<=0) { clearInterval(recTmr); stopAndNext(); }
+      }, 1000);
+    }
   } catch(e) {
     const isTelegram = /Telegram/i.test(navigator.userAgent) || window.TelegramWebApp || window.Telegram;
     const isInApp = isTelegram || /Instagram|FBAN|FBAV|Twitter|Line|WhatsApp/i.test(navigator.userAgent);
